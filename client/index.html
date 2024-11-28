@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz App</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div id="app">
+        <div v-if="error" class="error">{{ error }}</div>
+        <div v-if="loading" class="loading">Loading...</div>
+
+        <div v-if="!isAuthenticated" class="login-container">
+            <h1>Quiz App</h1>
+            <p>Please login to continue</p>
+            <div class="login-button-container">
+                <button @click="loginWithGoogle" class="login-button">
+                    <img src="https://developers.google.com/identity/images/g-logo.png" style="width: 24px;"
+                        alt="Google">
+                    <span style="font-size: 30px;margin-left: 10px;">Login with Google</span>
+                </button>
+            </div>
+        </div>
+
+        <div v-else>
+            <div class="user-info">
+                <span v-if="user">Welcome, {{ user.name }}</span>
+                <button @click="logout">Logout</button>
+            </div>
+
+            <div v-if="currentView === 'topics'">
+                <h2>Select a Topic</h2>
+                <div class="topics-view">
+                    <div v-for="topic in topics" :key="topic.id">
+                        <button @click="selectTopic(topic.id)" class="topic-button">
+                            <span class="topic-name">{{ topic.name }}</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="currentView === 'quiz' && currentQuestion">
+                <div class="quiz-container">
+                    <p class="question-level">Level: {{ currentQuestion.level }}</p>
+                    <h2>Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</h2>
+                    <p class="question-text">{{ currentQuestion.text }}</p>
+
+
+                    <div class="options-container">
+                        <div v-for="option in currentQuestion.options" :key="option.id" class="option-item">
+                            <input type="radio" :id="'option' + option.id" :value="option.id" v-model="selectedAnswer"
+                                :name="'question' + currentQuestion.id">
+                            <label :for="'option' + option.id">{{ option.text }}</label>
+                        </div>
+                    </div>
+
+                    <div class="navigation-buttons">
+                        <button @click="previousQuestion" :disabled="currentQuestionIndex === 0" class="nav-button">
+                            Previous
+                        </button>
+
+                        <button v-if="currentQuestionIndex < questions.length - 1" @click="nextQuestion"
+                            :disabled="!selectedAnswer" class="nav-button">
+                            Next
+                        </button>
+
+                        <button v-else @click="submitQuiz" :disabled="!selectedAnswer" class="submit-button">
+                            Submit Quiz
+                        </button>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress" :style="{ width: progressPercentage + '%' }"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-if="currentView === 'result'">
+                <h2>Quiz Complete!</h2>
+                <p>Your score: {{ score }}/10</p>
+                <button @click="restartQuiz">Try Another Quiz</button>
+            </div>
+
+            <div v-if="currentView === 'results'">
+                <h2>Quiz Results</h2>
+                <p>{{ resultMessage }}</p>
+                <p>Your score: {{ score }}</p>
+                <button @click="restartQuiz">Restart Quiz</button>
+            </div>
+        </div>
+    </div>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
